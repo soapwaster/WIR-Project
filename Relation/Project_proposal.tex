@@ -112,6 +112,19 @@ Terms are identified through WordNet, where they are linked to each other in dif
 The paper introduces a specific metric for quantifying the similarity of two words by measuring shortest path between their senses in the WordNet graph.\\
 We implement a new metric, using the WordNet graph. In particular we establish that the similarity depends on the least common ancestor in the term-hypernym path (the least the better).
 
+\section{Outline}
+\begin{itemize}
+\item \textbf{VSM} le caratteristiche e le limitazioni con la similarity.\\
+\item \textbf{GVSM}, introduzione di un nuovo modello vettoriale e di una estensione della vecchia cosine similarity che tiene conto della relazione semantica dei termini.\\
+\item \textbf{WORDNET}, e il fatto che il paper lo usi per trovare la similarity in base a delle metriche specificate ad-hoc : \texttt{SCM}, \texttt{SPE}, \texttt{SR}.\\
+\item \textbf{NOI}, che creiamo una nuova similarity measure basata su wordnet, che usa il least commont ancestor.\\
+\item \textbf{COMPARAZIONE}, Termine-Termine usando tre dataset. Document-Query usando NPL. Quest'ultimo, usando le metriche precision and recall graph.
+
+\end{itemize}
+
+
+
+
 \end{document}
 
 
