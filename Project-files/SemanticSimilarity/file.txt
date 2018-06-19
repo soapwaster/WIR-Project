@@ -1,0 +1,16 @@
+1
+compact memories have flexible capacities  a digital data storage
+system with capacity up to bits and random and or sequential access
+is described
+   /
+2
+an electronic analogue computer for solving systems of linear equations
+mathematical derivation of the operating principle and stability
+conditions for a computer consisting of amplifiers
+   /
+3
+electronic coordinate transformer  circuit details are given for
+the construction of an electronic calculating unit which enables
+the polar coordinates of a vector modulus and cosine or sine of the
+argument to be derived from those of a rectangular system of axes
+   /
