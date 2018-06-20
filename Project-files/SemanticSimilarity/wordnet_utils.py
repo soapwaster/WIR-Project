@@ -16,6 +16,7 @@ def nounify(adjective):
     :return: set of nouns semantically related to it
     """
     set_of_related_nouns = set()
+    print("")
 
     for lemma in wn.lemmas(wn.morphy(adjective, pos="a")):
         if len(lemma.derivationally_related_forms()) == 0:
