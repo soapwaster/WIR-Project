@@ -18,9 +18,15 @@ def nounify(adjective):
     set_of_related_nouns = set()
 
     for lemma in wn.lemmas(wn.morphy(adjective, pos="a")):
-        for related_form in lemma.derivationally_related_forms():
-            for synset in wn.synsets(related_form.name(), pos=wn.NOUN):
-                set_of_related_nouns.add(synset)
+        if len(lemma.derivationally_related_forms()) == 0:
+            for related_form in wn.synsets(lemma.name()):
+                for synset in related_form.attributes():
+                    set_of_related_nouns.add(synset)
+        else:
+            for related_form in lemma.derivationally_related_forms():
+                for synset in wn.synsets(related_form.name(), pos=wn.NOUN):
+                    set_of_related_nouns.add(synset)
+
 
     return set_of_related_nouns
 
@@ -125,9 +131,6 @@ def compute_cosine_similarity(docs, queries):
     tf, qtf, terms = tf_idf(dd, qq)
     return cosine_similarity(tf, qtf), terms
 
-'''
-Computes the new cosine similarity TODO
-'''
 def new_cosine_similarity(vec1, vec2):
     intersection = set(vec1.keys()) & set(vec2.keys())
     numerator = sum([vec1[x] * vec2[x] for x in intersection])
@@ -141,5 +144,32 @@ def new_cosine_similarity(vec1, vec2):
     else:
         return float(numerator) / denominator
 
+def lowest_common_hypernym(term1, term2):
+    synsets_t1 = wn.synsets(term1)
+    synsets_t2 = wn.synsets(term2)
+    lch = ""
 
-print(compute_cosine_similarity("file.txt", "query.txt")[1])
+    for s in synsets_t1:
+        if s.pos() == 'v' :
+            continue
+        elif s.pos() == 'a':
+            synsets_t1.extend(list(nounify(s.lemmas()[0].name())))
+            continue
+        for t in synsets_t2:
+            if t.pos() == 'v':
+                continue
+            elif t.pos() == 'a':
+                synsets_t2.extend(list(nounify(t.lemmas()[0].name())))
+                continue
+            print(s)
+            print(t)
+            print(s.lowest_common_hypernyms(t))
+            print("-------------")
+
+            lch = s.lowest_common_hypernyms(t)
+
+    return lch
+
+
+#print(compute_cosine_similarity("file.txt", "query.txt")[1])
+print(lowest_common_hypernym("false","fake"))
