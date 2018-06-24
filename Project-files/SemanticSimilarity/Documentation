@@ -1,0 +1,18 @@
+DATASET
+
+doc-Text : (docID,text)
+
+query-Text : (queryID,text)
+
+rlv-ass : (queyID, docID's) -> ground truth
+
+
+
+
+FUNCTIONS :
+
+TfidfTrasformer : http://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfTransformer.html
+
+CountVectorizer : http://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html
+
+tokenize : https://www.nltk.org/api/nltk.tokenize.html

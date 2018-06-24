@@ -16,7 +16,7 @@ def nounify(adjective):
     :return: set of nouns semantically related to it
     """
     set_of_related_nouns = set()
-    print("etstestets")
+
 
     for lemma in wn.lemmas(wn.morphy(adjective, pos="a")):
         if len(lemma.derivationally_related_forms()) == 0:
@@ -87,30 +87,44 @@ def tokenize(text):
 def tf_idf(docs, q_docs):
     """
     Returns the tf-idf matrix. TODO is the fact that the idf's should be independed, but here they are not.
-    :param docs: document set (list)
-    :param q_docs: query set (list)
+    :param docs: document set (list of string)
+    :param q_docs: query set (list of string)
     :return: tf-idf matrix
     """
     s_docs = docs + q_docs
-    tf = CountVectorizer()
-    tfT = TfidfTransformer(use_idf=False, sublinear_tf=True, norm=False)
+    tf = CountVectorizer() #To build the count matrix
+    tfT = TfidfTransformer(use_idf=False, sublinear_tf=True, norm=False)# To build the count matrix with smoothing
+
     tf_matrix = tf.fit_transform(s_docs)
-    s_docs_fn = tf.get_feature_names()
+    s_docs_fn = tf.get_feature_names() # All the terms in documents and query with the index as id
 
     #Tf_matrix
-    tf_matrix = tfT.transform(tf_matrix,copy=False)
+    tf_matrix = tfT.transform(tf_matrix,copy=False) # The smooth count matrix wrt documents and queries
 
     #Idf for docs
-    idfD = TfidfTransformer(use_idf=True)
+    idfD = TfidfTransformer(use_idf=True) # To get the idf for only the terms of the documents
+
     idfD = idfD.fit(tf.fit_transform(docs))
     docs_fn = tf.get_feature_names()
-    ones_for_docs = np.ones(len(s_docs_fn)) # [1,1,1,1,1,1,...,1]
+    #ones_for_docs = np.ones(len(s_docs_fn)) # [1,1,1,1,1,1,...,1]
+
+    # At the i-th position there is the idf of the i-th term according the mapping of s_docs_fn
+    # It must be initilized to 1+ln(N=#documents) that is the idf when a term of the query is not present in the vocavulary of the documents
+    ones_for_docs = np.full(len(s_docs_fn),1+np.log(len(docs_fn)))
     for i,el in enumerate(docs_fn):
         index = s_docs_fn.index(el)
-        ones_for_docs[index] = ones_for_docs[index] * idfD.idf_[i]
+        #ones_for_docs[index] = ones_for_docs[index] * idfD.idf_[i]
+        ones_for_docs[index] = idfD.idf_[i]
 
+    #tfidf for the documents
     tf_matrix[0:4, :] = tf_matrix[0:4, :].multiply(np.tile(ones_for_docs, (4, 1)))
 
+    # tfidf for the queries
+    tf_matrix[4:, :] = tf_matrix[4:, :].multiply(np.tile(ones_for_docs, (len(q_docs) + 1, 1)))
+
+    #returns also the mapping termid->term as index->s_docs_fn[index]
+    return tf_matrix[0:4, :], tf_matrix[4:, :], s_docs_fn
+'''
     #Ids for queries
     idfQ = TfidfTransformer(use_idf=True)
     idfQ = idfQ.fit(tf.fit_transform(q_docs))
@@ -122,6 +136,8 @@ def tf_idf(docs, q_docs):
 
     tf_matrix[4:,:] = tf_matrix[4:,:].multiply(np.tile(ones_for_docs,(len(q_docs)+1,1)))
     return tf_matrix[0:4,:], tf_matrix[4:,:], s_docs_fn
+'''
+
 '''print(nounify("apologetic"))
 print(nounify("lonely"))
 print(nounify("handsome"))'''
@@ -173,4 +189,4 @@ def lowest_common_hypernym(term1, term2):
 
 
 #print(compute_cosine_similarity("file.txt", "query.txt")[1])
-print(lowest_common_hypernym("false","fake"))
+#print(lowest_common_hypernym("false","fake"))
