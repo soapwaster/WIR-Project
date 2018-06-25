@@ -1,6 +1,16 @@
 import wordnet_utils
 
-
+import nltk as nltk
+from nltk.tokenize import word_tokenize as wt
+from nltk.corpus import wordnet as wn
+import numpy as np
+from textblob import TextBlob
+import io
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import re, math
 document_0 = "Tree Sun"
 document_1 = "Ice Tree"
 document_2 = "House Garden"
@@ -15,7 +25,10 @@ from scipy.sparse import coo_matrix
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
-def tfidf(docs):
+
+
+
+def tfidfNEW(docs,qdocs):
 
     sklearn_tfidf = TfidfVectorizer(norm='l2',min_df=0, use_idf=True, smooth_idf=False, sublinear_tf=True, tokenizer=wordnet_utils.tokenize)
     doc_vect = sklearn_tfidf.fit_transform(docs)
@@ -24,8 +37,13 @@ def tfidf(docs):
 
     return doc_vect, term_index, sklearn_tfidf.idf_
 
-d,q,t = wordnet_utils.tf_idf(all_documents,all_queries)
+a=TfidfVectorizer(norm=False, use_idf=False, sublinear_tf=True)
 
-print(d)
-print(q)
-print(t)
+b=TfidfTransformer(use_idf=False, sublinear_tf=True, norm=False)
+
+#print(a.fit_transform(all_documents))
+#print(b.fit_transform(all_documents))
+a,b,c=wordnet_utils.tf_idf(all_documents,all_queries)
+#print(a)
+print(b[0])
+#print(c)

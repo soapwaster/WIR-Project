@@ -12,7 +12,7 @@ import re, math
 from collections import Counter
 import scipy
 from scipy.sparse import csr_matrix, find
-
+from nltk.corpus import wordnet
 
 def nounify(adjective):
     """
@@ -204,28 +204,281 @@ def lowest_common_hypernym(term1, term2):
     return lch
 
 
-# print(compute_cosine_similarity("file.txt", "query.txt")[1])
+def super_merge(a,b,val_d,val_q):
+    '''
+
+    :param a: array of integer : termid_doc
+    :param b: array of integer : termid_query
+    :param val_d: array of integer : val_doc
+    :param val_q: array of integer : val_query
+    :return: merged sorted array  by termid, of triples (termid,val_doc,val_query)
+    '''
 
 
-'''
-print(tf)
-print(qtf)
-print(terms)
-'''
+    i1=0
+    i2=0
+    la = len(a)
+    lb = len(b)
+    lab = la+lb
+    ris = []
+    for t in range(lab):
+        if (i1+i2>lab-1): break;
+        if (i1>la-1):
+            ris.append( (b[i2],0,val_q[i2]))
+            i2+=1
+        elif (i2>lb-1) :
+            ris.append((a[i1],val_d[i1],0))
+            i1+=1
 
-def gvsm_similarity(doc, query, term, similarity):
-    #TODO : OPTIMIZATION
-    #    r,c,v = find(doc)
-    #    r2, c2, v2 = find(query)
-    #iterate over the union
+        elif (a[i1]<b[i2]):
+            ris.append((a[i1],val_d[i1],0))
+            i1+=1;
+
+        elif (b[i2]<a[i1]):
+            ris.append((b[i2],0,val_q[i2]))
+            i2+=1;
+
+
+        else :
+
+            ris.append((b[i2],val_d[i1],val_q[i2]))
+            i2+=1
+            i1+=1
+
+
+    return ris
+
+def merge(a,b):
+
+    i1=0
+    i2=0
+    la = len(a)
+    lb = len(b)
+    lab = la+lb
+    ris = []
+    for t in range(lab):
+        if (i1+i2>lab-1): break;
+        if (i1>la-1):
+            ris.append( b[i2])
+            i2+=1
+        elif (i2>lb-1) :
+            ris.append(a[i1])
+            i1+=1
+
+        elif (a[i1]<b[i2]):
+            ris.append(a[i1])
+            i1+=1;
+
+        else :
+            ris.append(b[i2])
+            i2+=1;
+
+
+    return ris
+
+
+def no_opt_gvsm_similarity_Approx1_qq_dd_dq(doc, query, term, similarity):
+    '''
+    TODO: optimization
+    Accessing to the tfidf score in the sparse vector doc or query is expensive .
+    The optimization can be done becuase find returns the tfidf score associated to a doc or query
+
+    '''
+
     """
-    Returns the similarity score
+    Returns the approximated similarity score iterating over the union of terms in doc and query
     :param doc: tdidf document vector
     :param query: tdidf query vector
     :param term: array of mapping term
     :param similarity: similarity function
     :return: gvsm score
     """
+
+    row_d,col_d,val_d = find(doc)
+    row_q, col_q,val_q = find(query)
+
+
+    tot = merge(col_d,col_q)
+
+
+    dim = len(tot)
+    score = 0;
+    den_doc = 0;
+    den_query = 0;
+
+
+
+
+    for i in range(dim):
+        d_i = doc[0,tot[i]] #very expensive
+        q_i = query[0,tot[i]] #very expensive
+        for j in range(i,dim):
+            sim = similarity(term[tot[i]],term[tot[j]])
+            docij = ( d_i + doc[0,tot[j]] )*sim #very expensive
+            queryij =( q_i + query[0,tot[j]] )*sim #very expensive
+            score += ( docij  ) * ( queryij )
+            den_doc += np.square(docij)
+            den_query += np.square(queryij)
+
+    norm = np.sqrt(den_doc*den_query)
+
+    return score/norm
+
+def opt_gvsm_similarity_Approx1_qq_dd_dq(doc, query, term, similarity):
+
+    """
+    Returns the approximated similarity score iterating over the union of terms in doc and query
+    :param doc: tdidf document vector
+    :param query: tdidf query vector
+    :param term: array of mapping term
+    :param similarity: similarity function
+    :return: gvsm score
+    """
+
+    row_d,col_d,val_d = find(doc)
+    row_q, col_q,val_q = find(query)
+
+
+
+
+
+    tot = super_merge(col_d,col_q,val_d,val_q)
+    #tot is an array of triples (term_id , tfidf_termID in doc , tfidf_termID in query) sorted by term_id
+
+
+    dim = len(tot)
+    score = 0;
+    den_doc = 0;
+    den_query = 0;
+
+
+
+    for i in range(dim):
+        termID_ith = tot[i][0]
+
+
+        d_i =  tot[i][1]
+        q_i = tot[i][2]
+        #print(term[termID_ith])
+        for j in range(i,dim):
+            #print(i)
+            #print(j)
+            termID_jth = tot[j][0]
+
+            #print(term[termID_jth])
+
+            sim = similarity(term[termID_ith],term[termID_jth])
+            docij = ( d_i + tot[j][1] )*sim
+            queryij =( q_i + tot[j][2]  )*sim
+            score += ( docij  ) * ( queryij )
+            print("terms : "+str(term[termID_ith])+" "+str(term[termID_jth])+" docij : "+str(docij)+" queryij : "+str(queryij)+" product : "+str(( docij  ) * ( queryij )))
+            den_doc += np.square(docij)
+            den_query += np.square(queryij)
+
+    norm = np.sqrt(den_doc*den_query)
+
+    return score/norm
+
+def gvsm_similarity_Approx2_dq(doc, query, term, similarity):
+
+    """
+    Returns the similarity score approximated iterating over the doc and query terms but it should be optimized
+    :param doc: tdidf document vector
+    :param query: tdidf query vector
+    :param term: array of mapping term
+    :param similarity: similarity function
+    :return: gvsm score
+    """
+    row_d,col_d,val_d = find(doc)
+    row_q, col_q, val_q = find(query)
+    print(col_d)
+    print(col_q)
+
+    #tot = merge(col_d,col_q)
+
+    dim_doc = len(col_d)
+    dim_query = len(col_q)
+    score = 0;
+    den_doc = 0;
+    den_query = 0;
+
+
+
+
+    for i in range(dim_doc):
+        d_i = doc[0,col_d[i]]
+        q_i = query[0,col_d[i]]
+        for j in range(dim_query):
+            sim = similarity(term[col_d[i]],term[col_q[j]])
+            docij = ( d_i + doc[0,col_q[j]] )*sim
+            queryij =( q_i + query[0,col_q[j]] )*sim
+            score += ( docij  ) * ( queryij )
+            den_doc += np.square(docij)
+            den_query += np.square(queryij)
+
+    norm = np.sqrt(den_doc*den_query)
+    return score/norm
+
+def gvsm_similarity_complete_slow_all_qandd(doc, query, term, similarity):
+
+    """
+    Returns the similarity score computed iterating over all terms and terms in query or document but it is too expensive
+    :param doc: tdidf document vector
+    :param query: tdidf query vector
+    :param term: array of mapping term
+    :param similarity: similarity function
+    :return: gvsm score
+    """
+    row_d,col_d,val_d = find(doc)
+    row_q, col_q, val_q = find(query)
+
+    doc_and_query = []
+    doc_and_query.extend(col_d)
+    doc_and_query.extend(col_q)
+    print(col_d)
+    print(col_q)
+
+
+    dim_tot = len(term)
+    dim_doc = len(col_d)
+    dim_query = len(col_q)
+    score = 0;
+    den_doc = 0;
+    den_query = 0;
+
+
+
+
+    for i in range(dim_tot):
+        d_i = doc[0,i]
+        q_i = query[0,i]
+        for j in range(len(doc_and_query)):
+            sim = similarity(term[i],term[j])
+            docij = ( d_i + doc[0,j] )*sim
+            queryij =( q_i + query[0,j] )*sim
+            score += ( docij  ) * ( queryij )
+            den_doc += np.square(docij)
+            den_query += np.square(queryij)
+
+    norm = np.sqrt(den_doc*den_query)
+    return score/norm
+
+def gvsm_similarity_complete_slow(doc, query, term, similarity):
+    """
+    Returns the correct similarity score but it is too expensive
+    :param doc: tdidf document vector
+    :param query: tdidf query vector
+    :param term: array of mapping term
+    :param similarity: similarity function
+    :return: gvsm score
+    """
+    #row_d,col_d,val_d = find(doc)
+    #row_q, col_q, val_q = find(query)
+    #print(col_d)
+    #print(col_q)
+
+
+
     dim = len(term)
     score = 0;
     den_doc = 0;
@@ -248,57 +501,60 @@ def gvsm_similarity(doc, query, term, similarity):
     norm = np.sqrt(den_doc*den_query)
     return score/norm
 
+
 def f(a,b):
     return 1
 
+
+
+def sim(word1,word2):
+
+    s=0
+
+
+
+    l1=wordnet.synsets(word1)
+    l2=wordnet.synsets(word2)
+
+    if (l1 and l2): s = l1[0].wup_similarity(l2[0])*1000
+    if (s is None):
+        s=0
+
+
+
+    return s
 
 
 dd = load_documents("file.txt")
 qq = load_documents("query.txt")
 tf, qtf, terms = tf_idf(dd, qq)
 
-print(terms)
+
 
 d1 = tf[1]
 q1 = qtf[2] #query n.1
 
 
-for i in range(len(terms)):
-    if (q1[0,i]!=0): print(terms[i])
 
 
-#print(q1)
 import time
+'''
 start = time.time()
-s=gvsm_similarity(d1,q1,terms,f)
+s1=no_opt_gvsm_similarity_Approx1_qq_dd_dq(d1,q1,terms,sim)
 tot = time.time()-start
-print(s)
-print("time elapsed : "+str(tot))
+print("time elapsed non opt : "+str(tot))
 print("total estimated : "+str(tot*93*11429))
-#print(tf[2:3,:])
-#print(qtf)
-#print(len(terms))
-#print(terms[416])
-
-#d1 = tf[1]
-#print(d1)
-#q1 = qtf[1]
-
-#print(d1[0,416])
-
-#print("------------------------\n")
-#print(d1[0])
-
-#s=gvsm_similarity(tf[1],qtf[1],terms,f)
-#print("------------------------\n")
-#print(s)
-
 '''
+start = time.time()
+s2=opt_gvsm_similarity_Approx1_qq_dd_dq(d1,q1,terms,sim)
+tot = time.time()-start
+print("time elapsed  opt : "+str(tot))
+print("total estimated : "+str(tot*93*11429))
 
-cx = scipy.sparse.coo_matrix()
-print(cx.getrow(1))
-print("------------------------")
-for i,j,v in zip(cx.row, cx.col, cx.data):
-    print("(%d, %d), %s" % (i,j,v))
-'''
+
+#print("Non-opt : "+str(s1))
+print("Opt : "+str(s2))
+
+#s3=gvsm_similarity_complete_slow(d1,q1,terms,sim)
+#print(s3)
 
