@@ -19,10 +19,27 @@ s4=su.no_opt_gvsm_similarity_Approx1_qq_dd_dq(tf[5583],qtf[28],terms,su.f)
 s5=su.no_opt_gvsm_similarity_Approx1_qq_dd_dq(tf[5850],qtf[28],terms,su.f)
 s6=su.no_opt_gvsm_similarity_Approx1_qq_dd_dq(tf[7482],qtf[28],terms,su.f)
 s7=su.no_opt_gvsm_similarity_Approx1_qq_dd_dq(tf[1],qtf[28],terms,su.f)
+
+print(s2)
+print(s3)
+print(s4)
+print(s5)
+print(s6)
+print(s7)
+
+s2=su.gvsm_approx_similarity(tf[4720],qtf[28],terms,su.f)
+s3=su.gvsm_approx_similarity(tf[5472],qtf[28],terms,su.f)
+s4=su.gvsm_approx_similarity(tf[5583],qtf[28],terms,su.f)
+s5=su.gvsm_approx_similarity(tf[5850],qtf[28],terms,su.f)
+s6=su.gvsm_approx_similarity(tf[7482],qtf[28],terms,su.f)
+s7=su.gvsm_approx_similarity(tf[1],qtf[28],terms,su.f)
+
+
+
 al = su.compute_cosine_similarity(tf,qtf)
 #aa = wnu.lowest_common_hypernym("corgi","dog")
 #print(list(aa.closure(lambda s: s.hypernyms())))
-print(al[4720][28])
+print("---------")
 print(s2)
 print(s3)
 print(s4)

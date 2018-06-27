@@ -69,45 +69,7 @@ def no_opt_gvsm_similarity_Approx1_qq_dd_dq(doc, query, term, similarity):
 
     return score/norm
 
-def gvsm_similarity_Approx2_dq(doc, query, term, similarity):
 
-    """
-    Returns the similarity score approximated iterating over the doc and query terms but it should be optimized
-    :param doc: tdidf document vector
-    :param query: tdidf query vector
-    :param term: array of mapping term
-    :param similarity: similarity function
-    :return: gvsm score
-    """
-    row_d,col_d,val_d = find(doc)
-    row_q, col_q, val_q = find(query)
-    print(col_d)
-    print(col_q)
-
-    #tot = merge(col_d,col_q)
-
-    dim_doc = len(col_d)
-    dim_query = len(col_q)
-    score = 0;
-    den_doc = 0;
-    den_query = 0;
-
-
-
-
-    for i in range(dim_doc):
-        d_i = doc[0,col_d[i]]
-        q_i = query[0,col_d[i]]
-        for j in range(dim_query):
-            sim = similarity(term[col_d[i]],term[col_q[j]])
-            docij = ( d_i + doc[0,col_q[j]] )*sim
-            queryij =( q_i + query[0,col_q[j]] )*sim
-            score += ( docij  ) * ( queryij )
-            den_doc += np.square(docij)
-            den_query += np.square(queryij)
-
-    norm = np.sqrt(den_doc*den_query)
-    return score/norm
 
 
 
@@ -219,7 +181,6 @@ def lowest_common_hypernym(term1, term2):
 
     return lch
 
-
 def gvsm_approx_similarity(doc, query, term, similarity):
 
     """
@@ -238,7 +199,10 @@ def gvsm_approx_similarity(doc, query, term, similarity):
 
 
 
+
+
     tot = super_merge(col_d,col_q,val_d,val_q)
+
     #tot is an array of triples (term_id , tfidf_termID in doc , tfidf_termID in query) sorted by term_id
 
 
@@ -248,32 +212,84 @@ def gvsm_approx_similarity(doc, query, term, similarity):
     den_query = 0;
 
 
+    i=0
+    j=0
 
-    for i in range(dim):
+    flag1 = False
+    flag2 = False
+    flag3 = False
+    z = 0
+
+    while(i<dim):
         termID_ith = tot[i][0]
+
 
 
         d_i =  tot[i][1]
         q_i = tot[i][2]
         #print(term[termID_ith])
-        for j in range(i,dim):
+        #print(" d_i q_i " + " " + str(d_i) + " " + str(d_i))
+        while (j+i<dim):
+
+
             #print(i)
             #print(j)
-            termID_jth = tot[j][0]
+            termID_jth = tot[j+i][0]
 
             #print(term[termID_jth])
 
             sim = similarity(term[termID_ith],term[termID_jth])
-            docij = ( d_i + tot[j][1] )*sim
-            queryij =( q_i + tot[j][2]  )*sim
+            docij = ( d_i + tot[j+i][1] )*sim
+            queryij =( q_i + tot[j+i][2]  )*sim
+
+
+
+
             score += ( docij  ) * ( queryij )
-            #print("terms : "+str(term[termID_ith])+" "+str(term[termID_jth])+" docij : "+str(docij)+" queryij : "+str(queryij)+" product : "+str(( docij  ) * ( queryij )))
+
+
+
+            #print(" docij : " + str(docij) + " queryij : " + str(queryij) + " product : " + str((docij) * (queryij)))
+            #print("score "+str(score))
             den_doc += np.square(docij)
             den_query += np.square(queryij)
+
+            if (flag2):
+                j+=1
+                flag2= False
+                #if ( not flag3 ): flag3 = False
+                continue
+            if (flag1):
+                j+=1
+                flag3 = True
+                flag1= False
+                continue
+
+            if (tot[j+i][1]==0 or tot[j+i][2]==0 ):
+                j+=1
+
+            else :
+                flag2 = True
+        j=0
+        if (flag3):
+            flag3=False
+
+            i+=1
+            continue
+
+
+
+        if (d_i == 0 or q_i == 0):
+            i+=1
+        else :
+            flag1 = True
+
 
     norm = np.sqrt(den_doc*den_query)
 
     return score/norm
+
+
 
 
 
