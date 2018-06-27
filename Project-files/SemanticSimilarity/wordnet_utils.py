@@ -164,24 +164,17 @@ print(nounify("handsome"))'''
 def compute_cosine_similarity(tfidfdocs, tfidfqueries):
     return cosine_similarity(tfidfdocs, tfidfqueries)
 
+def compute_cosine_similarity_from_file(tf, qtf):
+    dd = load_documents(tf)
+    qq = load_documents(qtf)
 
-def new_cosine_similarity(vec1, vec2):
-    intersection = set(vec1.keys()) & set(vec2.keys())
-    numerator = sum([vec1[x] * vec2[x] for x in intersection])
-
-    sum1 = sum([vec1[x] ** 2 for x in vec1.keys()])
-    sum2 = sum([vec2[x] ** 2 for x in vec2.keys()])
-    denominator = math.sqrt(sum1) * math.sqrt(sum2)
-
-    if not denominator:
-        return 0.0
-    else:
-        return float(numerator) / denominator
-
+    a,b,c = tf_idf(dd,qq)
+    return compute_cosine_similarity(a,b)
 
 def lowest_common_hypernym(term1, term2):
     synsets_t1 = wn.synsets(term1)
     synsets_t2 = wn.synsets(term2)
+    max_depth = 0
     lch = ""
 
     for s in synsets_t1:
@@ -196,12 +189,13 @@ def lowest_common_hypernym(term1, term2):
             elif t.pos() == 'a':
                 synsets_t2.extend(list(nounify(t.lemmas()[0].name())))
                 continue
-            print(s)
-            print(t)
-            print(s.lowest_common_hypernyms(t))
-            print("-------------")
+            lc = s.lowest_common_hypernyms(t)
+            depth = lc[0].min_depth()
+            if lc != [] and  depth > max_depth:
+                max_depth = depth
+                lch = lc[0]
+                #lch.append(s.lowest_common_hypernyms(t))
 
-            lch = s.lowest_common_hypernyms(t)
 
     return lch
 
@@ -520,58 +514,16 @@ def sim(word1,word2):
 
 
 
-    l1=wordnet.synsets(word1)
-    l2=wordnet.synsets(word2)
+    l1=wordnet.synsets(word1, pos="n")
+    l2=wordnet.synsets(word2, pos="n")
 
-    if (l1 and l2): s = l1[0].wup_similarity(l2[0])*1000
+
+    if (l1 and l2):
+        s = l1[0].wup_similarity(l2[0])
+        #print(str(l1[0]) + " ---- " + str(l2[0]) + " simi : " + str(s))
     if (s is None):
         s=0
 
 
 
     return s
-
-
-
-'''dd = load_documents("file.txt")
-qq = load_documents("query.txt")
-tf, qtf, terms = tf_idf(dd, qq)
-
-
-
-d1 = tf[1]
-q1 = qtf[2] #query n.1
-
-a,b,c = find(tf[1])
-for el in b :
-    print(terms[el])
-
-'''
-
-import time
-'''
-start = time.time()
-s1=no_opt_gvsm_similarity_Approx1_qq_dd_dq(d1,q1,terms,sim)
-tot = time.time()-start
-print("time elapsed non opt : "+str(tot))
-print("total estimated : "+str(tot*93*11429))
-'''
-tf = load_sparse("tfidf_doc_matrix.npz")
-qtf = load_sparse("tfidf_query_matrix.npz")
-start = time.time()
-#s2=gvsm_similarity_complete_slow(d1,q1,terms,f)
-#s2=opt_gvsm_similarity_Approx1_qq_dd_dq(d1,q1,terms,sim)
-#s2=gvsm_similarity_Approx2_dq(d1,q1,terms,sim)
-a = compute_cosine_similarity(tf,qtf)
-print(a[4][4])
-tot = time.time()-start
-print("time elapsed  opt : "+str(tot))
-print("total estimated : "+str(tot*93*1000))
-
-
-#print("Non-opt : "+str(s1))
-#print("Opt : "+str(s2))
-
-#s3=gvsm_similarity_complete_slow(d1,q1,terms,sim)
-#print(s3)
-
