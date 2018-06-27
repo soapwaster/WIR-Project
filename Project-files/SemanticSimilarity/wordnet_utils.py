@@ -13,6 +13,7 @@ from collections import Counter
 import scipy
 from scipy.sparse import csr_matrix, find
 from nltk.corpus import wordnet
+import sys
 
 def nounify(adjective):
     """
@@ -48,6 +49,7 @@ def load_documents(doc_file):
     :param doc_file: File of documents
     :return: List of documents where the index is the doc-id
     """
+    s = 0
     in_file = open(doc_file, "r")
     text = in_file.read()
     in_file.close()
@@ -59,6 +61,8 @@ def load_documents(doc_file):
 
     docs = text.strip().split("/")
     for el in docs:
+        s = s +1
+        print(str(s) + "")
         el = el.strip()
         el = io.StringIO(el)
         doc_id = el.readline()
@@ -108,7 +112,6 @@ def tf_idf(docs, q_docs):
 
     # Tf_matrix
     tf_matrix = tfT.transform(tf_matrix, copy=False)  # The tf  matrix wrt documents and queries
-
     # Idf for docs
     idfD = TfidfTransformer(use_idf=True)  # To get the idf for only the terms of the documents
 
@@ -125,16 +128,15 @@ def tf_idf(docs, q_docs):
         ones_for_docs[index] = idfD.idf_[i]
 
     # tfidf for the documents
-    tf_matrix[0:4, :] = tf_matrix[0:4, :].multiply(np.tile(ones_for_docs, (4, 1)))
+    for i in range(0,len(docs)):
+        tf_matrix[i, :] = tf_matrix[i, :].multiply(ones_for_docs)
 
     # tfidf for the queries
-    tf_matrix[4:, :] = tf_matrix[4:, :].multiply(np.tile(ones_for_docs, (len(q_docs) + 1, 1)))
+    for i in range(len(docs),len(docs)+len(q_docs)):
+        tf_matrix[i, :] = tf_matrix[i, :].multiply(ones_for_docs)
 
     # returns also the mapping termid->term as index->s_docs_fn[index]
-
-
-
-    return tf_matrix[0:4, :], tf_matrix[4:, :], s_docs_fn
+    return tf_matrix[0:len(docs), :], tf_matrix[len(docs):, :], s_docs_fn
 
 
 '''
@@ -371,7 +373,7 @@ def opt_gvsm_similarity_Approx1_qq_dd_dq(doc, query, term, similarity):
             docij = ( d_i + tot[j][1] )*sim
             queryij =( q_i + tot[j][2]  )*sim
             score += ( docij  ) * ( queryij )
-            print("terms : "+str(term[termID_ith])+" "+str(term[termID_jth])+" docij : "+str(docij)+" queryij : "+str(queryij)+" product : "+str(( docij  ) * ( queryij )))
+            #print("terms : "+str(term[termID_ith])+" "+str(term[termID_jth])+" docij : "+str(docij)+" queryij : "+str(queryij)+" product : "+str(( docij  ) * ( queryij )))
             den_doc += np.square(docij)
             den_query += np.square(queryij)
 
@@ -525,6 +527,7 @@ def sim(word1,word2):
     return s
 
 
+
 dd = load_documents("file.txt")
 qq = load_documents("query.txt")
 tf, qtf, terms = tf_idf(dd, qq)
@@ -534,6 +537,9 @@ tf, qtf, terms = tf_idf(dd, qq)
 d1 = tf[1]
 q1 = qtf[2] #query n.1
 
+a,b,c = find(tf[1])
+for el in b :
+    print(terms[el])
 
 
 
@@ -546,10 +552,12 @@ print("time elapsed non opt : "+str(tot))
 print("total estimated : "+str(tot*93*11429))
 '''
 start = time.time()
-s2=opt_gvsm_similarity_Approx1_qq_dd_dq(d1,q1,terms,sim)
+#s2=gvsm_similarity_complete_slow(d1,q1,terms,f)
+#s2=opt_gvsm_similarity_Approx1_qq_dd_dq(d1,q1,terms,sim)
+s2=gvsm_similarity_Approx2_dq(d1,q1,terms,sim)
 tot = time.time()-start
 print("time elapsed  opt : "+str(tot))
-print("total estimated : "+str(tot*93*11429))
+print("total estimated : "+str(tot*93*1000))
 
 
 #print("Non-opt : "+str(s1))
