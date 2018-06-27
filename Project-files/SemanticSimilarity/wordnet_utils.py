@@ -176,6 +176,8 @@ def lowest_common_hypernym(term1, term2):
     synsets_t2 = wn.synsets(term2)
     max_depth = 0
     lch = ""
+    t1 = ""
+    t2 = ""
 
     for s in synsets_t1:
         if s.pos() == 'v':
@@ -193,12 +195,19 @@ def lowest_common_hypernym(term1, term2):
             depth = lc[0].min_depth()
             if lc != [] and  depth > max_depth:
                 max_depth = depth
+                t1 = s
+                t2 = t
                 lch = lc[0]
                 #lch.append(s.lowest_common_hypernyms(t))
 
 
-    return lch
+    return lch, max_depth, t1, t2
 
+def custom_similarity(term1, term2):
+    lca,lca_depth,terma,termb = lowest_common_hypernym(term1,term2)
+    hop_diff = (terma.min_depth() - lca_depth) + (termb.min_depth() - lca_depth) +1
+    depth_info = np.log(lca_depth) #Devi usare qualche info sulla depth dell'lca
+    return (1/hop_diff) * depth_info
 
 def super_merge(a,b,val_d,val_q):
     '''

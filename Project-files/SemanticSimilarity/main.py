@@ -1,12 +1,15 @@
 import wordnet_utils as wnu
 import time
+
+def printdiff(a,b):
+    print(str(a) + "---" + str(b))
 '''
 start = time.time()
 s1=no_opt_gvsm_similarity_Approx1_qq_dd_dq(d1,q1,terms,sim)
 tot = time.time()-start
 print("time elapsed non opt : "+str(tot))
 print("total estimated : "+str(tot*93*11429))
-'''
+
 d = wnu.load_documents("file.txt")
 q = wnu.load_documents("query.txt")
 a,b,terms = wnu.tf_idf(d,q)
@@ -25,13 +28,20 @@ s7=wnu.gvsm_similarity_Approx2_dq(tf[1],qtf[28],terms,wnu.f)
 al = wnu.compute_cosine_similarity(tf,qtf)
 #aa = wnu.lowest_common_hypernym("corgi","dog")
 #print(list(aa.closure(lambda s: s.hypernyms())))
-print(al[4720][28])
-print(s2)
-print(s3)
-print(s4)
+printdiff(s2,al[4720][28])
+printdiff(s3,al[5472][28])
+printdiff(s4,al[5583][28])
 print(s5)
 print(s6)
-print(s7)
+printdiff(s7,al[1][28])
+'''
+start = time.time()
+a = wnu.custom_similarity("bottle","container")
+b = wnu.custom_similarity("ball","dance")
+c = wnu.custom_similarity("france","catheter")
+print(a)
+print(b)
+print(c)
 tot = time.time()-start
 print("time elapsed  opt : "+str(tot))
 #print("total estimated : "+str(tot*93*1000))
