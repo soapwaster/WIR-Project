@@ -11,6 +11,22 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import re, math
+import nltk as nltk
+from nltk.tokenize import word_tokenize as wt
+from nltk.corpus import wordnet as wn
+import numpy as np
+from textblob import TextBlob
+import io
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import re, math
+from collections import Counter
+import scipy
+from scipy.sparse import csr_matrix, find
+from nltk.corpus import wordnet
+import sys
 document_0 = "Tree Sun"
 document_1 = "Ice Tree"
 document_2 = "House Garden"
@@ -23,6 +39,10 @@ all_queries =[query_0]
 
 from scipy.sparse import coo_matrix
 from sklearn.feature_extraction.text import TfidfVectorizer
+
+
+
+
 
 
 
@@ -41,9 +61,3 @@ a=TfidfVectorizer(norm=False, use_idf=False, sublinear_tf=True)
 
 b=TfidfTransformer(use_idf=False, sublinear_tf=True, norm=False)
 
-#print(a.fit_transform(all_documents))
-#print(b.fit_transform(all_documents))
-a,b,c=wordnet_utils.tf_idf(all_documents,all_queries)
-#print(a)
-print(b[0])
-#print(c)
