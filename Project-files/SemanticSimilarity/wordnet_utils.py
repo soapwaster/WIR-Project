@@ -135,6 +135,9 @@ def tf_idf(docs, q_docs):
     for i in range(len(docs),len(docs)+len(q_docs)):
         tf_matrix[i, :] = tf_matrix[i, :].multiply(ones_for_docs)
 
+
+    save_sparse(tf_matrix[0:len(docs), :],"tfidf_doc_matrix")
+    save_sparse(tf_matrix[len(docs):, :],"tfidf_query_matrix")
     # returns also the mapping termid->term as index->s_docs_fn[index]
     return tf_matrix[0:len(docs), :], tf_matrix[len(docs):, :], s_docs_fn
 
@@ -158,11 +161,8 @@ print(nounify("lonely"))
 print(nounify("handsome"))'''
 
 
-def compute_cosine_similarity(docs, queries):
-    dd = load_documents(docs)
-    qq = load_documents(queries)
-    tf, qtf, terms = tf_idf(dd, qq)
-    return cosine_similarity(tf, qtf), terms
+def compute_cosine_similarity(tfidfdocs, tfidfqueries):
+    return cosine_similarity(tfidfdocs, tfidfqueries)
 
 
 def new_cosine_similarity(vec1, vec2):
@@ -503,6 +503,11 @@ def gvsm_similarity_complete_slow(doc, query, term, similarity):
     norm = np.sqrt(den_doc*den_query)
     return score/norm
 
+def save_sparse(sp_m,name):
+    scipy.sparse.save_npz(name+".npz", sp_m)
+def load_sparse(file_name):
+    return scipy.sparse.load_npz(file_name)
+
 
 def f(a,b):
     return 1
@@ -528,7 +533,7 @@ def sim(word1,word2):
 
 
 
-dd = load_documents("file.txt")
+'''dd = load_documents("file.txt")
 qq = load_documents("query.txt")
 tf, qtf, terms = tf_idf(dd, qq)
 
@@ -541,7 +546,7 @@ a,b,c = find(tf[1])
 for el in b :
     print(terms[el])
 
-
+'''
 
 import time
 '''
@@ -551,17 +556,21 @@ tot = time.time()-start
 print("time elapsed non opt : "+str(tot))
 print("total estimated : "+str(tot*93*11429))
 '''
+tf = load_sparse("tfidf_doc_matrix.npz")
+qtf = load_sparse("tfidf_query_matrix.npz")
 start = time.time()
 #s2=gvsm_similarity_complete_slow(d1,q1,terms,f)
 #s2=opt_gvsm_similarity_Approx1_qq_dd_dq(d1,q1,terms,sim)
-s2=gvsm_similarity_Approx2_dq(d1,q1,terms,sim)
+#s2=gvsm_similarity_Approx2_dq(d1,q1,terms,sim)
+a = compute_cosine_similarity(tf,qtf)
+print(a[4][4])
 tot = time.time()-start
 print("time elapsed  opt : "+str(tot))
 print("total estimated : "+str(tot*93*1000))
 
 
 #print("Non-opt : "+str(s1))
-print("Opt : "+str(s2))
+#print("Opt : "+str(s2))
 
 #s3=gvsm_similarity_complete_slow(d1,q1,terms,sim)
 #print(s3)
