@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/SemanticSimilarity.iml" filepath="$PROJECT_DIR$/.idea/SemanticSimilarity.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/WIR-Project.iml" filepath="$PROJECT_DIR$/.idea/WIR-Project.iml" />
     </modules>
   </component>
 </project>
