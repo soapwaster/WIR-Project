@@ -389,23 +389,42 @@ def sim(word1,word2):
 
     return s
 
-def query_sims(q,docs,terms,sim,list):
+def query_relevant_top_100(q,docs,terms,sim,list):
+    """
+    :param q: tfidf vector for the query
+    :param docs: tfidf matrix for documents
+    :param terms: term vector
+    :param sim: similarity function
+    :param list: list of documents to compare with
+    :return: top 100 documents retrieved by sim
+    """
     val = []
-    lll = []
-    j = 0
-    for u in list:
-        j=j+1
-        if j == 1705 : break
-        lll.append(u)
-    for i in lll:
-        print(i)
+    for u,i in enumerate(list):
+        #if u == 100: break
         val.append(tuple((gvsm_approx_similarity(docs[i,:],q,terms,sim),i)))
     a = sorted(val, key=lambda t: t[0])
     b = []
-    j = 0
     for i in range(1,99):
-        b.append(a[-i])
+        b.append(a[-i][1])
     return b
+
+def query_intersection(query_top_100_from_sim, query_real_rel):
+    """
+    :param query_top_100_from_sim: list of elements found relevant from the custom similarity function
+    :param query_real_rel: real relevant documents
+    :return: list of elemnts where element i is 1 if the document is relevant
+    """
+    print(query_real_rel)
+    print(query_top_100_from_sim)
+    intersection = list(set(query_real_rel).intersection(query_top_100_from_sim))
+    print(intersection)
+    rel_list = []
+    for i in range(0,len(query_real_rel)):
+        if query_top_100_from_sim[i] in intersection:
+            rel_list.append(1)
+        else:
+            rel_list.append(-1)
+    return rel_list
 
 def term_sim_compare(term, sim):
     """

@@ -147,3 +147,15 @@ def load_all_relevant_docs(file):
 
 
     return rel_list
+
+def load_relevant_for_query(query_id, file):
+    real_rel = load_documents("Test/Dataset/rlv-ass.txt")[query_id]
+    rel_list = []
+
+    v = real_rel.strip().split(" ")
+    for el in v:
+        el = el.strip().split("\n")
+        for ul in el:
+            if ul != "":
+                rel_list.append(int(ul))
+    return rel_list
