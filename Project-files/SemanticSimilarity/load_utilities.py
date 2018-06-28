@@ -40,8 +40,6 @@ def load_documents(doc_file):
 
     docs = text.strip().split("/")
     for el in docs:
-        s = s +1
-        print(str(s) + "")
         el = el.strip()
         el = io.StringIO(el)
         doc_id = el.readline()
@@ -131,3 +129,21 @@ def load_terms(file_name):
 def tokenize(text):
     tokenizer = wt(text)
     return tokenizer
+
+def load_all_relevant_docs(file):
+    """
+    :param file: relevance file
+    :return: set of relevant docs
+    """
+    rel_list= set()
+    rel_docs = load_documents(file)
+    for el in rel_docs:
+        v = el.strip().split(" ")
+        for el in v:
+            el = el.strip().split("\n")
+            for ul in el:
+                if ul != "":
+                    rel_list.add(int(ul))
+
+
+    return rel_list

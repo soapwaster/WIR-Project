@@ -71,10 +71,6 @@ def no_opt_gvsm_similarity_Approx1_qq_dd_dq(doc, query, term, similarity):
 
     return score/norm
 
-
-
-
-
 def gvsm_similarity_complete_slow(doc, query, term, similarity):
     """
     Returns the correct similarity score but it is too expensive
@@ -113,10 +109,6 @@ def gvsm_similarity_complete_slow(doc, query, term, similarity):
     norm = np.sqrt(den_doc*den_query)
     return score/norm
 
-
-
-
-
 def nounify(adjective):
     """
      :param adjective: the adjective
@@ -135,7 +127,6 @@ def nounify(adjective):
                     set_of_related_nouns.add(synset)
 
     return set_of_related_nouns
-
 
 def extract_noun_phrases(txt):
     """
@@ -196,7 +187,6 @@ def custom_similarity(term1, term2):
     if hop_diff == 0 : hop_diff = 1
     depth_info = np.log(lca_depth) #Devi usare qualche info sulla depth dell'lca
     return (1/hop_diff) * depth_info
-
 
 def gvsm_approx_similarity(doc, query, term, similarity):
 
@@ -304,10 +294,6 @@ def gvsm_approx_similarity(doc, query, term, similarity):
 
     return score/norm
 
-
-
-
-
 def super_merge(a,b,val_d,val_q):
     '''
 
@@ -383,8 +369,6 @@ def merge(a,b):
 def f(a,b):
     return 1
 
-
-
 def sim(word1,word2):
 
     s=0
@@ -405,12 +389,23 @@ def sim(word1,word2):
 
     return s
 
-def query_sims(q,docs,terms,sim):
+def query_sims(q,docs,terms,sim,list):
     val = []
-    for i in range(774,776):
-        val.append(gvsm_approx_similarity(docs[i,:],q,terms,sim))
-    print(max(val))
-    return val
+    lll = []
+    j = 0
+    for u in list:
+        j=j+1
+        if j == 1705 : break
+        lll.append(u)
+    for i in lll:
+        print(i)
+        val.append(tuple((gvsm_approx_similarity(docs[i,:],q,terms,sim),i)))
+    a = sorted(val, key=lambda t: t[0])
+    b = []
+    j = 0
+    for i in range(1,99):
+        b.append(a[-i])
+    return b
 
 def term_sim_compare(term, sim):
     """
@@ -441,3 +436,22 @@ def all_term_sim(sim,sim_name):
         file.write('rg;' + str(rg[0])+"\n")
         file.write('ws;' + str(ws[0])+"\n")
         file.write('mc;' + str(mc[0]))
+
+def top_relevant_docs_for_query_from_cosine(tf,qtf,filename):
+    """
+    Saves into a file the top 100 documents for a given query according to cosine similarity
+    :param tf: documents tfidf matrix
+    :param qtf: query tfidf matrix
+    :param filename: filename to save top relevant docs
+    """
+    al = compute_cosine_similarity(tf, qtf)
+    file = open(filename, 'w')
+    for i in range(1,94):
+        zipp = zip(al[:, i], range(0, 11430))
+        a = sorted(zipp, key=lambda t: t[0])
+        a = list(a)
+        file.write(str(i) + "\n")
+        for j in range(1, 100):
+            file.write(str(a[-j][1])+" ")
+        file.write("/ \n")
+    file.close()
