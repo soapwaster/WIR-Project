@@ -116,7 +116,6 @@ def tf_idf(docs, q_docs):
     # returns also the mapping termid->term as index->s_docs_fn[index]
     return tf_matrix[0:len(docs), :], tf_matrix[len(docs):, :], s_docs_fn
 
-
 def save_sparse(sp_m,name):
     scipy.sparse.save_npz(name+".npz", sp_m)
 def load_sparse(file_name):

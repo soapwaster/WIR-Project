@@ -1,9 +1,10 @@
-import wordnet_utils as wnu
+import similarity_utilities as wnu
+import load_utilities as lu
 import time
 
-#d = wnu.load_documents("Test/Dataset/document.txt")
-#q = wnu.load_documents("Test/Dataset/query.txt")
-#a,b,terms = wnu.tf_idf(d,q)
+#d = lu.load_documents("Test/Dataset/document.txt")
+#q = lu.load_documents("Test/Dataset/query.txt")
+#a,b,term = lu.tf_idf(d,q)
 
 tf = lu.load_sparse("Intermidiate-data-structure/tfidf_doc_matrix.npz")
 qtf = lu.load_sparse("Intermidiate-data-structure/tfidf_query_matrix.npz")
@@ -59,12 +60,25 @@ print(s6)
 printdiff(s7,al[1][28])
 '''
 start = time.time()
+'''
 a = wnu.custom_similarity("bottle","container")
 b = wnu.custom_similarity("ball","dance")
 c = wnu.custom_similarity("france","catheter")
 print(a)
 print(b)
 print(c)
+'''
+
+al = wnu.compute_cosine_similarity(tf,qtf)
+
+zipp = zip(al[:,3], range(0,11430))
+a = sorted(zipp,key = lambda t: t[0])
+a = list(a)
+for i in range(0,15):
+    print(a[-i])
+wnu.all_term_sim(wnu.custom_similarity,"Intermidiate-data-structure/our_custom_sim.csv")
+#wnu.term_sim_compare(lu.load_terms("Test/Dataset/wordsim.csv"),wnu.custom_similarity)
+#print(wnu.query_sims(qtf[5],tf,terms,wnu.custom_similarity))
 tot = time.time()-start
 print("time elapsed  opt : "+str(tot))
 #print("total estimated : "+str(tot*93*1000))

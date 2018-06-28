@@ -7,8 +7,10 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import scipy
+from scipy.stats import pearsonr
 from scipy.sparse import csr_matrix, find
 from nltk.corpus import wordnet
+import load_utilities as lu
 import io
 
 import numpy as np
@@ -122,7 +124,7 @@ def nounify(adjective):
     """
     set_of_related_nouns = set()
 
-    for lemma in wn.lemmas(wn.morphy(adjective, pos="a")):
+    for lemma in wn.lemmas(wn.morphy(adjective.lower(), pos="a")):
         if len(lemma.derivationally_related_forms()) == 0:
             for related_form in wn.synsets(lemma.name()):
                 for synset in related_form.attributes():
@@ -154,10 +156,12 @@ def compute_cosine_similarity_from_file(tf, qtf):
     return compute_cosine_similarity(a,b)
 
 def lowest_common_hypernym(term1, term2):
-    synsets_t1 = wn.synsets(term1)
-    synsets_t2 = wn.synsets(term2)
+    synsets_t1 = wn.synsets(term1,pos="n")
+    synsets_t2 = wn.synsets(term2,pos="n")
     max_depth = 0
     lch = ""
+    t1 = ""
+    t2 = ""
 
     for s in synsets_t1:
         if s.pos() == 'v':
@@ -171,15 +175,28 @@ def lowest_common_hypernym(term1, term2):
             elif t.pos() == 'a':
                 synsets_t2.extend(list(nounify(t.lemmas()[0].name())))
                 continue
+
             lc = s.lowest_common_hypernyms(t)
-            depth = lc[0].min_depth()
+            depth = 0
+            if lc != []:
+                depth = lc[0].min_depth()
             if lc != [] and  depth > max_depth:
                 max_depth = depth
+                t1 = s
+                t2 = t
                 lch = lc[0]
                 #lch.append(s.lowest_common_hypernyms(t))
 
+    return lch, max_depth, t1, t2
 
-    return lch
+def custom_similarity(term1, term2):
+    lca,lca_depth,terma,termb = lowest_common_hypernym(term1,term2)
+    if(lca_depth == 0): return 0
+    hop_diff = (terma.min_depth() - lca_depth) + (termb.min_depth() - lca_depth) + 1
+    if hop_diff == 0 : hop_diff = 1
+    depth_info = np.log(lca_depth) #Devi usare qualche info sulla depth dell'lca
+    return (1/hop_diff) * depth_info
+
 
 def gvsm_approx_similarity(doc, query, term, similarity):
 
@@ -235,8 +252,6 @@ def gvsm_approx_similarity(doc, query, term, similarity):
             #print(i)
             #print(j)
             termID_jth = tot[j+i][0]
-
-            #print(term[termID_jth])
 
             sim = similarity(term[termID_ith],term[termID_jth])
             docij = ( d_i + tot[j+i][1] )*sim
@@ -381,7 +396,7 @@ def sim(word1,word2):
 
 
     if (l1 and l2):
-        s = l1[0].wup_similarity(l2[0])
+        s = l1[0].path_similarity(l2[0])
         #print(str(l1[0]) + " ---- " + str(l2[0]) + " simi : " + str(s))
     if (s is None):
         s=0
@@ -389,3 +404,40 @@ def sim(word1,word2):
 
 
     return s
+
+def query_sims(q,docs,terms,sim):
+    val = []
+    for i in range(774,776):
+        val.append(gvsm_approx_similarity(docs[i,:],q,terms,sim))
+    print(max(val))
+    return val
+
+def term_sim_compare(term, sim):
+    """
+    :param term: dictionary of terms (t1,t2,v) : v
+    :param sim: similarity function to use
+    :return pc: pearson coefficient
+    """
+    a =[]
+    b =[]
+    for el in term:
+        terms = el.split(";")
+        similarity = sim(terms[0],terms[1])
+        a.append(float(terms[2]))
+        b.append(similarity)
+        #print(str(terms) + " .... "+ str(similarity))
+    return pearsonr(a,b)
+
+def all_term_sim(sim,sim_name):
+    """
+    Computes all similarity for all the term-term files, and saves them into a file
+    :param sim: similarity function
+    :param sim_name: name of the file (with extension)
+    """
+    rg = term_sim_compare(lu.load_terms("Test/Dataset/rg.csv"),sim)
+    ws = term_sim_compare(lu.load_terms("Test/Dataset/wordsim.csv"),sim)
+    mc = term_sim_compare(lu.load_terms("Test/Dataset/mc.csv"),sim)
+    with open(sim_name, 'w') as file:
+        file.write('rg;' + str(rg[0])+"\n")
+        file.write('ws;' + str(ws[0])+"\n")
+        file.write('mc;' + str(mc[0]))
