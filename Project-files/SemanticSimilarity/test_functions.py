@@ -11,3 +11,32 @@ def test_query(query_id,tf,qtf,terms):
         thefile.write(el)
     thefile.write("/")
     return inters
+
+def precision_recall(vals):
+    vals = vals.strip().split(",")
+    print(vals)
+    no_r = vals.count(' 1')
+    tp = 1
+    c = 1
+    p = [1]
+    r = [0]
+    for el in vals:
+        if el == ' 1' :
+            tp += 1
+        c +=1
+        p.append(tp/c)
+        r.append(tp/no_r)
+    return p,r
+def precision_recall_cosine_temp(vals):
+    no_r = vals.count(1)
+    tp = 1
+    c = 1
+    p = [1]
+    r = [0]
+    for el in vals:
+        if el == 1:
+            tp += 1
+        c += 1
+        p.append(tp / c)
+        r.append(tp / no_r)
+    return p, r

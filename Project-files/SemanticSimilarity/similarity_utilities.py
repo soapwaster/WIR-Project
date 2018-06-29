@@ -416,11 +416,13 @@ def query_intersection(query_top_100_from_sim, query_real_rel):
     """
     print(query_real_rel)
     print(query_top_100_from_sim)
+    query_top_100_from_sim = list(map(int, query_top_100_from_sim))
     intersection = list(set(query_real_rel).intersection(query_top_100_from_sim))
     print(intersection)
     rel_list = []
-    for i in range(0,len(query_real_rel)):
-        if query_top_100_from_sim[i] in intersection:
+    for i,el in enumerate(query_top_100_from_sim):
+        if(i == len(query_real_rel)): break;
+        if el in intersection:
             rel_list.append(1)
         else:
             rel_list.append(-1)
