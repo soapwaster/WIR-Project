@@ -372,22 +372,17 @@ def f(a,b):
 def sim(word1,word2):
 
     s=0
-
-
-
+    max = 0
     l1=wordnet.synsets(word1, pos="n")
     l2=wordnet.synsets(word2, pos="n")
-
-
     if (l1 and l2):
-        s = l1[0].path_similarity(l2[0])
-        #print(str(l1[0]) + " ---- " + str(l2[0]) + " simi : " + str(s))
+        for a in l1:
+            for t in l2:
+                s = a.path_similarity(t)
+                if s > max: max = s
     if (s is None):
-        s=0
-
-
-
-    return s
+        max=0
+    return max
 
 def query_relevant_top_100(q,docs,terms,sim,list):
     """
