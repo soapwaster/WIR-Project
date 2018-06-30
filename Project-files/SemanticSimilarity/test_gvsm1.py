@@ -113,7 +113,7 @@ for i in range(1,N_QUERY):
             recall_level += 1
     #print(precision)
 
-precision = list(map(lambda x: x/N_QUERY, precision))
+precision = list(map(lambda x: x/(N_QUERY-1), precision))
 print(precision)
 #print(su.gvsm_approx_similarity(tf[813], qtf[4], terms, su.f))
 #score : 0.31237573126322477
