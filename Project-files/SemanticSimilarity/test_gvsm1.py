@@ -13,6 +13,11 @@ import sklearn as sk
 N_QUERY = 50
 
 
+
+start= time.time()
+su.sim("house","box")
+print(time.time()-start)
+
 tf = lu.load_sparse("Intermidiate-data-structure/tfidf_doc_matrix.npz")
 qtf = lu.load_sparse("Intermidiate-data-structure/tfidf_query_matrix.npz")
 terms = lu.load_terms("Intermidiate-data-structure/termID_mapping_list.txt")
@@ -46,7 +51,10 @@ for i in range(1,N_QUERY):
     start = time.time()
     query = qtf[i]
     print("\nQuery N: "+str(i)+" on "+str(N_QUERY))
+
+
     for j in range(N_DOC):
+        print(j)
         doc = tf[ all_doc[j] ]
         s = su.gvsm_approx_similarity(doc, query, terms, su.sim)
         #s=sk.metrics.pairwise.cosine_similarity(doc,query)
@@ -57,7 +65,7 @@ for i in range(1,N_QUERY):
 
         #print(str(s)+" "+str(all_doc[j]))
         count+=1
-        if (count > 50):
+        if (count > 20):
             print("--- Complete : "+str(100*j/N_DOC)+"%")
             #print("Doc N: "+str(j)+" on "+str(N_DOC))
             count = 0
@@ -73,11 +81,12 @@ for i in range (1,N_QUERY):
 
 precision = [0]*10 #i-th index is the precision at recall (i+1)*0,1
 
-
+file = open("gvsm-report.txt","w")
 print("\nTASK 3 : Precision-Recall\n")
 
 for i in range(1,N_QUERY):
     print("\n\n\n\nRelevant docs for the query : "+str(i))
+    file.write("\n\n\n\nRelevant docs for the query : "+str(i))
 
     den_recall = len(relevant_doc[i])
     den_precision = 0.0
@@ -91,6 +100,7 @@ for i in range(1,N_QUERY):
         #print("docID : " + str(final_score[i][j][1]))
         if (final_score[i][j][1] in relevant_doc[i]):
             print(" docID : "+str(final_score[i][j][1])+" score : "+str(final_score[i][j][0]))
+            file.write(" docID : "+str(final_score[i][j][1])+" score : "+str(final_score[i][j][0]))
             num_recall+=1
             #print("recall"+str(num_recall/den_recall))
             #print("precision "+str(num_recall/den_precision))
@@ -120,9 +130,11 @@ docID : 4569.0
 '''
 
 #print(su.gvsm_approx_similarity(tf[4569], qtf[1], terms, su.sim))
+file.write(str(precision))
 plt.plot([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0] ,precision, '-o')
 plt.xlabel('Recall')
 plt.ylabel('Precision')
 plt.ylim([0.0, 1.1])
 plt.xlim([0.0, 1.1])
 plt.show()
+file.close()
