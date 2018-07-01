@@ -10,13 +10,13 @@ import sklearn as sk
 
 #with 50 query -> 70-100 sec for query ==> 1-1.4 h
 
-N_QUERY = 50
+N_QUERY = 3
 
 
 
 start= time.time()
 su.sim("house","box")
-print(time.time()-start)
+print("If it is greater than 0.1 secs it will never terminate  "+str(time.time()-start))
 
 tf = lu.load_sparse("Intermidiate-data-structure/tfidf_doc_matrix.npz")
 qtf = lu.load_sparse("Intermidiate-data-structure/tfidf_query_matrix.npz")
@@ -43,14 +43,14 @@ final_score_cos_sim = np.zeros((N_QUERY,N_DOC,2))
 
 #print(all_doc)
 
-print("\nTASK 1 : Computing scores on query, doc : "+str(N_QUERY)+" "+str(N_DOC)+"\n")
+print("\nTASK 1 : Computing scores on query, doc : "+str(N_QUERY-1)+" "+str(N_DOC)+"\n")
 
 count=0
 
 for i in range(1,N_QUERY):
     start = time.time()
     query = qtf[i]
-    print("\nQuery N: "+str(i)+" on "+str(N_QUERY))
+    print("\nQuery N: "+str(i)+" on "+str(N_QUERY-1))
 
 
     for j in range(N_DOC):
@@ -81,12 +81,14 @@ for i in range (1,N_QUERY):
 
 precision = [0]*10 #i-th index is the precision at recall (i+1)*0,1
 
+single_query = [0]*10
+
 file = open("gvsm-report.txt","w")
 print("\nTASK 3 : Precision-Recall\n")
 
 for i in range(1,N_QUERY):
     print("\n\n\n\nRelevant docs for the query : "+str(i))
-    file.write("\n\n\n\nRelevant docs for the query : "+str(i))
+    file.write("\n\n\n\nRelevant docs for the query : "+str(i)+"\n")
 
     den_recall = len(relevant_doc[i])
     den_precision = 0.0
@@ -100,7 +102,7 @@ for i in range(1,N_QUERY):
         #print("docID : " + str(final_score[i][j][1]))
         if (final_score[i][j][1] in relevant_doc[i]):
             print(" docID : "+str(final_score[i][j][1])+" score : "+str(final_score[i][j][0]))
-            file.write(" docID : "+str(final_score[i][j][1])+" score : "+str(final_score[i][j][0]))
+            file.write(" docID : "+str(final_score[i][j][1])+" score : "+str(final_score[i][j][0])+"\n")
             num_recall+=1
             #print("recall"+str(num_recall/den_recall))
             #print("precision "+str(num_recall/den_precision))
@@ -110,11 +112,16 @@ for i in range(1,N_QUERY):
             #print("RECALL"+str(num_recall/den_recall))
             #print("PRECISION "+str(num_recall/den_precision))
             precision[recall_level-1] += num_recall/den_precision
+            single_query[recall_level - 1] = num_recall / den_precision
             recall_level += 1
+    print("The single score for the query : " + str(single_query))
+    file.write("The single score for the query : " + str(single_query) + "\n")
     #print(precision)
 
-precision = list(map(lambda x: x/N_QUERY, precision))
-print(precision)
+precision = list(map(lambda x: x/(N_QUERY-1), precision))
+print("The final score for all the queries : "+str(precision))
+file.write("\n\nThe final score for all the queries : "+str(precision)+"\n")
+file.close()
 #print(su.gvsm_approx_similarity(tf[813], qtf[4], terms, su.f))
 #score : 0.31237573126322477
 #docID : 813.0
@@ -130,11 +137,11 @@ docID : 4569.0
 '''
 
 #print(su.gvsm_approx_similarity(tf[4569], qtf[1], terms, su.sim))
-file.write(str(precision))
+
+
 plt.plot([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0] ,precision, '-o')
 plt.xlabel('Recall')
 plt.ylabel('Precision')
 plt.ylim([0.0, 1.1])
 plt.xlim([0.0, 1.1])
 plt.show()
-file.close()
