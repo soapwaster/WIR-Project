@@ -210,6 +210,7 @@ def gvsm_approx_similarity(doc, query, term, similarity):
 
     tot = super_merge(col_d,col_q,val_d,val_q)
 
+
     #tot is an array of triples (term_id , tfidf_termID in doc , tfidf_termID in query) sorted by term_id
 
 

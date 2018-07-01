@@ -20,7 +20,7 @@ terms = lu.load_terms("Intermidiate-data-structure/termID_mapping_list.txt")
 #wnu.term_sim_compare(lu.load_terms("Test/Dataset/wordsim.csv"),wnu.custom_similarity)
 #common = test_f.test_query(27,tf,qtf,terms)
 #print(common)
-'''
+
 val = lu.load_documents("Test/Relevance/relevance_7.txt")
 qid = 26
 val2 = lu.load_documents("Intermidiate-data-structure/rlv-cosine.txt")
