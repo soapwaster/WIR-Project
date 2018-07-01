@@ -186,7 +186,7 @@ def custom_similarity(term1, term2):
     hop_diff = (terma.min_depth() - lca_depth) + (termb.min_depth() - lca_depth) + 1
     if hop_diff == 0 : hop_diff = 1
     depth_info = np.log(lca_depth) #Devi usare qualche info sulla depth dell'lca
-    return (1/hop_diff) * depth_info
+    return (1/(hop_diff**(1/2))) * depth_info
 
 def gvsm_approx_similarity(doc, query, term, similarity):
 

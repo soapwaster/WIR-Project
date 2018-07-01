@@ -159,3 +159,12 @@ def load_relevant_for_query(query_id, file):
             if ul != "":
                 rel_list.append(int(ul))
     return rel_list
+
+def save_query_intersection(query_id, query_list):
+    file = open("Test/Relevance/relevance_"+str(query_id)+".txt", "w")
+    file.write(str(query_id))
+    file.write("\n")
+    for el in query_list:
+        file.write(str(el) + ", ")
+    file.write("\n/")
+    file.close()

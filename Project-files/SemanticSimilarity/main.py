@@ -14,15 +14,24 @@ import numpy as np
 tf = lu.load_sparse("Intermidiate-data-structure/tfidf_doc_matrix.npz")
 qtf = lu.load_sparse("Intermidiate-data-structure/tfidf_query_matrix.npz")
 terms = lu.load_terms("Intermidiate-data-structure/termID_mapping_list.txt")
+
 #al = su.compute_cosine_similarity(tf,qtf)
 
 #wnu.all_term_sim(wnu.custom_similarity,"Intermidiate-data-structure/our_custom_sim.csv")
 #wnu.term_sim_compare(lu.load_terms("Test/Dataset/wordsim.csv"),wnu.custom_similarity)
 #common = test_f.test_query(27,tf,qtf,terms)
 #print(common)
-'''
-val = lu.load_documents("Test/Relevance/relevance_7.txt")
-qid = 26
+val = lu.load_documents("Test/Relevance/relevance_37.txt")
+ree = lu.load_all_relevant_docs("Test/Dataset/rlv-ass.txt")
+q_id=3
+#real_rell = lu.load_relevant_for_query(q_id,"Test/Dataset/rlv-ass.txt")
+#v = wnu.query_relevant_top_100(qtf[q_id],tf,terms,wnu.custom_similarity,ree)
+#aa = wnu.query_intersection(v,real_rell)
+#lu.save_query_intersection(q_id,aa)
+
+
+qid = 37
+
 val2 = lu.load_documents("Intermidiate-data-structure/rlv-cosine.txt")
 val2[qid] = val2[qid].strip().split(" ")
 real_rel = lu.load_relevant_for_query(qid, "Test/Dataset/rlv-ass.txt")
@@ -49,4 +58,6 @@ plt.ylabel('Precision')
 plt.ylim([0.0, 1.0])
 plt.xlim([0.0, 1.0])
 plt.show()
-'''
+
+
+#wnu.all_term_sim(wnu.custom_similarity,"Intermidiate-data-structure/colitta-sim2.csv")
