@@ -94,6 +94,7 @@ for i in range(1,N_QUERY):
     recall_level = 1
     tot_relevant = 0.0
 
+
     for j in reversed(range(N_DOC)):
         den_precision+=1
         #print("score : "+str(final_score[i][j][0]))
@@ -109,6 +110,19 @@ for i in range(1,N_QUERY):
 
             #print("RECALL"+str(num_recall/den_recall))
             #print("PRECISION "+str(num_recall/den_precision))
+            if (num_recall/den_recall >=1):
+                print(num_recall/den_recall)
+                print(recall_level)
+                for l in range(recall_level,11):
+                    print(precision[l - 1])
+                    precision[l - 1] += num_recall / den_precision
+                    single_query[l - 1] = num_recall / den_precision
+
+                break
+
+
+
+
             precision[recall_level-1] += num_recall/den_precision
             single_query[recall_level - 1] = num_recall / den_precision
             recall_level += 1
