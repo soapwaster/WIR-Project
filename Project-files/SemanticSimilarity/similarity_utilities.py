@@ -472,3 +472,15 @@ def top_relevant_docs_for_query_from_cosine(tf,qtf,filename):
             file.write(str(a[-j][1])+" ")
         file.write("/ \n")
     file.close()
+
+
+def nltk_similarity(word1,word2):
+
+
+
+    wordFromList1 = wordnet.synsets(word1)
+    wordFromList2 = wordnet.synsets(word2)
+    if wordFromList1 and wordFromList2:  # Thanks to @alexis' note
+        s = wordFromList1[0].wup_similarity(wordFromList2[0])
+        return s
+    else: return 0
