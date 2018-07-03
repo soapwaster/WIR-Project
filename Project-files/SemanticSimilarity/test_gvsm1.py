@@ -10,7 +10,7 @@ import sklearn as sk
 
 #with 50 query -> 70-100 sec for query ==> 1-1.4 h
 
-N_QUERY = 3
+N_QUERY = 50
 
 
 
