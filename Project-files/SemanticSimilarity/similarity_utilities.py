@@ -8,6 +8,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import scipy
 from scipy.stats import pearsonr
+from scipy.stats import spearmanr
 from scipy.sparse import csr_matrix, find
 from nltk.corpus import wordnet
 import load_utilities as lu
@@ -186,7 +187,7 @@ def custom_similarity(term1, term2):
     hop_diff = (terma.min_depth() - lca_depth) + (termb.min_depth() - lca_depth) + 1
     if hop_diff == 0 : hop_diff = 1
     depth_info = np.log(lca_depth) #Devi usare qualche info sulla depth dell'lca
-    return (1/(hop_diff**(1/2))) * depth_info
+    return (1/(hop_diff**(1/3))) * depth_info
 
 def gvsm_approx_similarity(doc, query, term, similarity):
 
@@ -410,11 +411,10 @@ def query_intersection(query_top_100_from_sim, query_real_rel):
     :param query_real_rel: real relevant documents
     :return: list of elemnts where element i is 1 if the document is relevant
     """
-    print(query_real_rel)
-    print(query_top_100_from_sim)
+
     query_top_100_from_sim = list(map(int, query_top_100_from_sim))
     intersection = list(set(query_real_rel).intersection(query_top_100_from_sim))
-    print(intersection)
+
     rel_list = []
     for i,el in enumerate(query_top_100_from_sim):
         if(i == len(query_real_rel)): break;
@@ -438,7 +438,7 @@ def term_sim_compare(term, sim):
         a.append(float(terms[2]))
         b.append(similarity)
         #print(str(terms) + " .... "+ str(similarity))
-    return pearsonr(a,b)
+    return spearmanr(a,b)
 
 def all_term_sim(sim,sim_name):
     """
