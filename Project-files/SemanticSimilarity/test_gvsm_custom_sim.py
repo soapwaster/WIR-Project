@@ -10,13 +10,11 @@ import sklearn as sk
 
 #with 50 query -> 70-100 sec for query ==> 1-1.4 h
 
-N_QUERY = 50
+N_QUERY = 15
 
 
 
-start= time.time()
-su.sim("house","box")
-print("If it is greater than 0.1 secs it will never terminate  "+str(time.time()-start))
+
 
 tf = lu.load_sparse("Intermidiate-data-structure/tfidf_doc_matrix.npz")
 qtf = lu.load_sparse("Intermidiate-data-structure/tfidf_query_matrix.npz")
@@ -56,7 +54,7 @@ for i in range(1,N_QUERY):
     for j in range(N_DOC):
         print(j)
         doc = tf[ all_doc[j] ]
-        s = su.gvsm_approx_similarity(doc, query, terms, su.sim)
+        s = su.gvsm_approx_similarity(doc, query, terms, su.custom_similarity)
         #s=sk.metrics.pairwise.cosine_similarity(doc,query)
 
 
@@ -83,7 +81,7 @@ precision = [0]*10 #i-th index is the precision at recall (i+1)*0,1
 
 single_query = [0]*10
 
-file = open("gvsm-report.txt","w")
+file = open("gvsm-report-customsimilarity-NQuery "+str(N_QUERY)+".txt","w")
 print("\nTASK 3 : Precision-Recall\n")
 
 for i in range(1,N_QUERY):
@@ -95,6 +93,7 @@ for i in range(1,N_QUERY):
     num_recall = 0.0
     recall_level = 1
     tot_relevant = 0.0
+
 
     for j in reversed(range(N_DOC)):
         den_precision+=1
@@ -111,6 +110,19 @@ for i in range(1,N_QUERY):
 
             #print("RECALL"+str(num_recall/den_recall))
             #print("PRECISION "+str(num_recall/den_precision))
+            if (num_recall/den_recall >=1):
+                print(num_recall/den_recall)
+                print(recall_level)
+                for l in range(recall_level,11):
+                    print(precision[l - 1])
+                    precision[l - 1] += num_recall / den_precision
+                    single_query[l - 1] = num_recall / den_precision
+
+                break
+
+
+
+
             precision[recall_level-1] += num_recall/den_precision
             single_query[recall_level - 1] = num_recall / den_precision
             recall_level += 1
