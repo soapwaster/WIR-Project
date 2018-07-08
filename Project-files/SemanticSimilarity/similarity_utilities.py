@@ -380,7 +380,7 @@ def sim(word1,word2):
     if (l1 and l2):
         for a in l1:
             for t in l2:
-                s = a.path_similarity(t)
+                s = a.wup_similarity(t)
                 if s > max: max = s
     if (s is None):
         max=0

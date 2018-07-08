@@ -62,6 +62,9 @@ plt.xlim([0.0, 1.0])
 plt.show()
 
 '''
+
+for z,i in enumerate([14,2,3,5]):
+    print(z)
 val2 = lu.load_documents("Intermidiate-data-structure/rlv-cosine.txt")
 vv = []
 vv.append(0)

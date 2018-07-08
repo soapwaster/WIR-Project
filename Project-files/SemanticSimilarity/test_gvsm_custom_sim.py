@@ -10,7 +10,7 @@ import sklearn as sk
 
 #with 50 query -> 70-100 sec for query ==> 1-1.4 h
 
-N_QUERY = 15
+N_QUERY = 14
 
 
 
@@ -19,16 +19,17 @@ N_QUERY = 15
 tf = lu.load_sparse("Intermidiate-data-structure/tfidf_doc_matrix.npz")
 qtf = lu.load_sparse("Intermidiate-data-structure/tfidf_query_matrix.npz")
 terms = lu.load_terms("Intermidiate-data-structure/termID_mapping_list.txt")
+QQ = [3,7,14,22,25,26,37,41,46,56,61,68,75,93]
+
 
 
 relevant_doc = [] #indicizzati per query
 all_doc = set()
 
-for i in range(N_QUERY):
+for z,i in enumerate(QQ):
 
     relevant_doc.append( lu.load_relevant_for_query(i, "Test/Dataset/rlv-ass.txt"))
-    all_doc.update(relevant_doc[i])
-
+    all_doc.update(relevant_doc[z])
 
 all_doc = list(all_doc)
 #print(len(all_doc))
@@ -45,7 +46,7 @@ print("\nTASK 1 : Computing scores on query, doc : "+str(N_QUERY-1)+" "+str(N_DO
 
 count=0
 
-for i in range(1,N_QUERY):
+for z,i in enumerate(QQ):
     start = time.time()
     query = qtf[i]
     print("\nQuery N: "+str(i)+" on "+str(N_QUERY-1))
@@ -54,12 +55,12 @@ for i in range(1,N_QUERY):
     for j in range(N_DOC):
         print(j)
         doc = tf[ all_doc[j] ]
-        s = su.gvsm_approx_similarity(doc, query, terms, su.custom_similarity)
-        #s=sk.metrics.pairwise.cosine_similarity(doc,query)
+        #s = su.gvsm_approx_similarity(doc, query, terms, su.custom_similarity)
+        s=sk.metrics.pairwise.cosine_similarity(doc,query)
 
 
-        final_score[i][j][0] = s
-        final_score[i][j][1] = np.int32(all_doc[j])
+        final_score[z][j][0] = s
+        final_score[z][j][1] = np.int32(all_doc[j])
 
         #print(str(s)+" "+str(all_doc[j]))
         count+=1
@@ -72,7 +73,7 @@ for i in range(1,N_QUERY):
 print("\nTASK 2 : Sorting scores\n")
 
 
-for i in range (1,N_QUERY):
+for i in range (0,N_QUERY):
     final_score[i] = final_score[i][final_score[i][:,0].argsort()]
 
 
@@ -81,10 +82,10 @@ precision = [0]*10 #i-th index is the precision at recall (i+1)*0,1
 
 single_query = [0]*10
 
-file = open("gvsm-report-customsimilarity-NQuery "+str(N_QUERY)+".txt","w")
+file = open("gvsm-report-customsimilaritycs2-NQuery "+str(N_QUERY)+".txt","w")
 print("\nTASK 3 : Precision-Recall\n")
 
-for i in range(1,N_QUERY):
+for i in range(0,N_QUERY):
     print("\n\n\n\nRelevant docs for the query : "+str(i))
     file.write("\n\n\n\nRelevant docs for the query : "+str(i)+"\n")
 
