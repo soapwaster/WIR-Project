@@ -1,5 +1,0 @@
-- Calcolare la max_depth a partire da Entity, ricorsivamente.
-- Cercare di nounifare iff la parola non ha dei noun. Ciò significa che come prima cosa devi cercare di trovare i noun
-- I verbi hanno una gerarchia ==> va bene cercare gli hypernyms.
-- Se t1 e t2 non stanno in wordnet (e.g. "rcu"), prendere in considerazione solo tf-idf e t1*t2 = 0;
-- Estrarre i compound nouns, non solo le parole una dopo l'altra...https://stackoverflow.com/questions/33587667/extracting-all-nouns-from-a-text-file-using-nltk?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
