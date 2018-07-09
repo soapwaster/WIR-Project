@@ -9,5 +9,5 @@ We use WordNet  in order to do measure similarities between two terms.
 
 # Detailed information
 -   [Link to relation](https://github.com/soapwaster/WIR-Project/blob/master/Relation/Final%20proposal/final-proposal.pdf)
-- [Link to a brief presentation](https://docs.google.com/presentation/d/1eOAfyHAbLEnD6W-PIhOoq6WQO7ssq984ukj9cfJrk0I/edit?usp=sharing)
+- [Link to a brief presentation](https://docs.google.com/presentation/d/18R5Tase3WfeGN53aSsB8WB0pjNmG-MSVORWKJGKKrDM/edit?usp=sharing)
 - [API Reference](https://github.com/soapwaster/WIR-Project/wiki/API-Reference)
